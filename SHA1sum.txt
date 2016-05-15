@@ -1,0 +1,8 @@
+Download：
+https://mirrors.ustc.edu.cn/blackarch/iso/
+
+Image	Version	Torrent	Size	SHA1sum
+BlackArch Linux 64bit LiveISO	2016.04.28	Torrent	4.5 GB	3ed5132820d17b5fa3b234b127f266d47741ec99
+BlackArch Linux 32bit LiveISO	2016.04.28	Torrent	4.3 GB	b3bd77af14eb6264067560bdfba0692bea42ace6
+BlackArch Linux 64bit Netinstall ISO	2016.04.28	Torrent	383 MB	36d424f42542d189281199651a5fc3d0e4e71ad1
+BlackArch Linux 32bit Netinstall ISO	2016.04.28	Torrent	345 MB	5e6cb462cc3ec637c7f02a21a709df15456c5751

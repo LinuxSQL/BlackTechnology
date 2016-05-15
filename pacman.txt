@@ -1,0 +1,305 @@
+=====Black Arch Linux===             
+          
+==============pacman包管理器使用教程==============
+[参考：https://wiki.archlinux.org/index.php/Pacman_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)]
+1、安装指定的包
+    a、安装或者升级单个软件包，或者一列软件包（包含依赖包），使用如下命令：
+        #pacman -S package_name1 package_name2 ...
+    b、用正则表达式安装多个软件包
+        #pacman -S $(pacman -Ssq package_regex)
+    c、有时候在不同的软件仓库中，一个软件包有多个版本（比如[extra]和[testing]）。可以选择一个来安装：
+        #pacman -S extra/package_name
+        
+ 2、安装包组
+    a、一些包属于一个可以同时安装的软件包组。例如，运行下面的命令
+        #pacman -S gnome
+        会提醒用户选择 gnome 内需要安装的包。
+        有的包组包含大量的软件包，有时用户只需其中几个。除了逐一键入序号外，pacman 还支持选择或排除某个区间内的的软件包：
+        Enter a selection (default=all): 1-10 15
+        这将选中序号 1 至 10 和 15 的软件包。而
+        Enter a selection (default=all): ^5-8 ^2
+        将会选中除了序号 5 至 8 和 2 之外的所有软件包。
+    b、想要查看哪些包属于 gnome 组，运行：
+        #pacman -Sg gnome
+    //也可以访问 https://www.archlinux.org/groups/ 查看可用的包组。
+    
+3、删除软件包
+    a、删除单个软件包，保留其全部已经安装的依赖关系
+        #pacman -R package_name
+    b、删除指定软件包，及其所有没有被其他已安装软件包使用的依赖关系：
+        #pacman -Rs package_name
+    c、要删除软件包和所有依赖这个软件包的程序:   
+        #pacman -Rsc package_name
+        //此操作是递归的，请小心检查，可能会一次删除大量的软件包。
+    d、要删除软件包，但是不删除依赖这个软件包的其他程序：    
+        #pacman -Rdd package_name
+    e、pacman 删除某些程序时会备份重要配置文件，在其后面加上*.pacsave扩展名。-n 选项可以删除这些文件：    
+        #pacman -Rn package_name
+        #pacman -Rsn package_name
+        //pacman不会删除软件自己创建的文件(例如主目录中的 .dot 文件不会被删除。
+
+4、升级软件包
+    a、这个命令会同步非本地(local)软件仓库并升级系统的软件包：
+        #pacman -Syu
+    *pacman 输出会记录到 /var/log/pacman.log。
+    
+    **Pacman/Pacnew and Pacsave[https://wiki.archlinux.org/index.php/Pacman/Pacnew_and_Pacsave_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)]
+
+5、查询包数据库
+    a、pacman 使用 -Q 参数查询本地软件包数据库。参见：
+        $ pacman -Q --help
+    b、使用 -S 参数来查询远程同步的数据库。参见：
+        $ pacman -S --help
+    c、pacman 可以在包数据库中查询软件包，查询位置包含了软件包的名字和描述：
+        $ pacman -Ss string1 string2 ...    
+    d、要查询已安装的软件包：
+        $ pacman -Qs string1 string2 ...    
+    e、显示软件包的详尽的信息：
+        $ pacman -Si package_name
+    f、查询本地安装包的详细信息：
+        $ pacman -Qi package_name   
+    g、使用两个 -i 将同时显示备份文件和修改状态：
+        $ pacman -Qii package_name    
+    h、要获取已安装软件包所包含文件的列表：
+        $ pacman -Ql package_name
+        *未安装的软件包使用 pkgfile。    
+    i、检查软件包安装的文件是否都存在：
+        $ pacman -Qk package_name
+    j、查询数据库获取某个文件属于哪个软件包：
+        $ pacman -Qo /path/to/file_name
+    k、要罗列所有不再作为依赖的软件包(孤立orphans)：
+        $ pacman -Qdt
+    l、要罗列所有明确安装而且不被其它包依赖的软件包：
+        $ pacman -Qet
+    m、要显示软件包的依赖树：
+        $ pactree package_name
+    n、检查一个安装的软件包被那些包依赖，可以使用 -r:    
+        $ pactree -r package_name
+
+6、数据库结构
+    a、pacman数据库通常位于 /var/lib/pacman/sync. 对于每一个在/etc/pacman.conf中指定的软件仓库， 这里都有一个一致的数据库。数据库文件夹里每个tar.gz文件都包含着一个仓库的软件包信息。例如which 包:
+        % tree which-2.20-6 	
+        which-2.20-6
+        |-- depends
+        `-- desc
+        这个 depends 项列出了该软件的依赖包， 而desc有该包的介绍，例如文件大小和MD5值 。
+
+7、清理软件包缓存
+    a、pacman 将下载的软件包保存在 /var/cache/pacman/pkg/ 并且不会自动移除旧的和未安装版本的软件包，因此需要手动清理，以免该文件夹过于庞大。
+    使用内建选项即可清除未安装软件包的缓存：
+        # pacman -Sc
+    //pacman -Scc 可以清理所有缓存，但这样 pacman 在重装软件包时就只能重新下载了。除非空间不足，否则不应这么做。
+    b、pacman 提供的 paccache 命令默认会删除近3个版本前的软件包
+        # paccache -r
+        **但是此命令不会检查某一个包是否安装了，因此会遗留未安装的包。再运行下面命令可解决此问题。
+            # paccache -ruk0
+            更多功能参见paccache -h
+
+8、其它命令
+    a、升级系统时安装其他软件包：
+        # pacman -Syu package_name1 package_name2 ...
+    b、下载包而不安装它：
+        # pacman -Sw package_name
+    c、安装一个本地包(不从源里下载）：
+        # pacman -U /path/to/package/package_name-version.pkg.tar.xz
+    d、要将本地包保存至缓存，可执行：
+        # pacman -U file://path/to/package/package_name-version.pkg.tar.xz
+    e、安装一个远程包（不在 pacman 配置的源里面）：
+        # pacman -U http://www.example.com/repo/example.pkg.tar.xz
+        要禁用 -S, -U 和 -R 动作，可以使用 -p 选项.
+        pacman 会列出需要安装和删除的软件，并在执行动作前要求需要的权限。
+
+9、配置
+    pacman 的配置文件位于/etc/pacman.conf。
+    man pacman.conf[https://www.archlinux.org/pacman/pacman.conf.5.html]可以查看配置文件的进一步信息。
+
+10、通用选项
+    通用选项都在[options]段。阅读 man 手册或者查看默认的 pacman.conf 可以获得有关信息和用法。
+
+11、彩色输出
+    [参考：https://wiki.archlinux.org/index.php/Pacman/Tips_and_tricks_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#.E5.B7.A7.E7.94.A8_Bash_.E8.AF.AD.E6.B3.95]
+    1、彩色输出
+        pacman 4.1.0 开始支持彩色输出，只需要在/etc/pacman.conf中取消 Color 行前面的注释即可使用。
+    2、快捷方式
+        使用命令别名简化常用pacman命令，方便使用和记忆。
+        配置 shell（下面是个范例，将其加入shell配置文件即，同时适用于Bash和Zsh：）
+        # Pacman 别名示例
+        alias pacupg='sudo pacman -Syu'        # 同步软件仓库信息然后升级系统
+        alias pacin='sudo pacman -S'           # 从软件仓库安装软件包
+        alias pacins='sudo pacman -U'          # 从本地文件安装软件包
+        alias pacre='sudo pacman -R'           # 删除软件包，保留配置和依赖
+        alias pacrem='sudo pacman -Rns'        # 彻底删除软件包，清除配置，删除无用依赖
+        alias pacrep='pacman -Si'              # 显示软件仓库中某软件包的信息
+        alias pacreps='pacman -Ss'             # 在软件仓库搜索软件包
+        alias pacloc='pacman -Qi'              # 显示本地数据库中某软件包的信息
+        alias paclocs='pacman -Qs'             # 在本地数据库搜索软件包
+        alias pacupd='sudo pacman -Sy && sudo abs'     # 同步软件仓库信息并更新abs
+        alias pacinsd='sudo pacman -S --asdeps'        # 将某软件包作为其它软件包的依赖安装
+        alias pacmir='sudo pacman -Syy'                # 强制刷新软件仓库信息
+        用法：就像使用普通命令一样使用这些别名即可。例如，
+        a、要同步软件仓库信息然后升级系统：
+            $ pacupg
+        b、从软件仓库安装软件包：
+            $ pacin <软件包1> <软件包2> <软件包3>
+        c、安装软件包文件： 
+            $ pacins /path/to/<软件包路径>
+        d、彻底删除软件包：
+            $ pacrem <软件包>
+        e、在软件仓库搜索软件包：    
+            $ pacreps <关键字>
+        f、显示软件仓库中某软件包的信息（比如：占用空间，依赖关系）：    
+            $ pacrep <keywords>
+    3、注解
+        上面提供的只是一个例子。按照上面的格式，可以自己编写命令别名，比如：
+            alias pacrem='sudo pacman -Rns'
+            alias pacout='sudo pacman -Rns'
+            上面的例子中，pacrem和pacout代表同样的命令：sudo pacman -Rns。你可以使用自己喜欢的名称代替这些命令。  
+
+    4、巧用 Bash 语法
+        下面应用Bash技巧，实现复杂的pacman功能。
+        安装多个名称部分相同的软件包（而非安装整个软件包组），以kde为例：
+            #pacman -S kde-{applets,theme,tools}
+        也可以嵌套使用：
+            #pacman -S kde-{ui-kde,kdeartwork}
+        使用-s搜索时会匹配软件包描述，从而导致很多不需要的结果。限制只匹配软件包名称：
+            #pacman -Ss '^vim-'
+        pacman的-q操作会输出所有本地软件包名称。利用该输出、以及简单的shell技巧，重新安装所有名称包含“compiz”的软件包：
+            #pacman -S $(pacman -Qq | grep compiz)        
+
+    5、显示所有软件包及其大小
+        将所有软件包按占用空间大小排序输出：
+        安装 expac 并运行  expac -s "%-30n %m" 
+        用 [community] 中的 pacgraph 加 -c 选项可以生成所有安装的软件包及其大小.        
+            
+    6、查找不属于任何软件包的文件
+        建议定期检查 pacman 数据库之外的文件。
+        通常这些文件是第三方程序使用一般方式安装 (例如 ./configure; make; make install)。下面脚本可以找出它们：        
+            pacman-disowned
+            #!/bin/sh
+            tmp=${TMPDIR-/tmp}/pacman-disowned-$UID-$$
+            db=$tmp/db
+            fs=$tmp/fs
+            mkdir "$tmp"
+            trap  'rm -rf "$tmp"' EXIT
+            pacman -Qlq | sort -u > "$db"
+            find /bin /etc /lib /sbin /usr \
+            ! -name lost+found \
+            \( -type d -printf '%p/\n' -o -print \) | sort > "$fs"
+            comm -23 "$fs" "$db"    
+            要生成列表：
+                $ pacman-disowned > non-db.txt
+            注意删除 non-db.txt 中的文件时先仔细确认。有写是配置文件、日志等，不要删除它们。
+
+    7、删除孤立软件包
+        递归删除孤立软件包：
+            # pacman -Rs $(pacman -Qtdq)
+        下面命令可以插入 $HOME/.bashrc 并在找到孤立软件包时进行删除：
+            orphans() {
+            if [[ ! -n $(pacman -Qdt) ]]; then
+                echo no orphans to remove
+            else
+                sudo pacman -Rs $(pacman -Qdtq)
+            fi
+            }
+
+    8、删除base软件包组以外的所有软件包
+        以下命令会保留base软件包组、删除其他所有软件包：
+            # pacman -Rs $(comm -23 <(pacman -Qeq|sort) <((for i in $(pacman -Qqg base); do pactree -ul $i; done)|sort -u|cut -d ' ' -f 1))     
+            *注记：
+                1、comm命令需要已排序的输入，否则会得到诸如“comm: file 1 is not in sorted order”之类的错误信息。
+                2、pactree是生成软件包依赖树的工具，输出如下： 
+                    $ pactree -lu logrotate
+                        logrotate
+                        popt
+                        glibc
+                        linux-api-headers
+                        tzdata
+                        dcron cron
+                        bash
+                        readline
+                        ncurses
+                        gzip  
+            为了避免“dcron cron”（前者是软件包名，后者是该软件包提供的软件包名）这样的内容导致错误，用到了cut -d ' ' -f 1——只保留软件包名称。
+
+    9、仅显示正式安装的软件包
+        pacman -Qq |grep -Fv -f <(pacman -Qqm)        
+
+12、不升级软件包
+    如果由于某种原因，用户不希望升级某个软件包，可以加入内容如下：
+        IgnorePkg = 软件包名
+    多软件包可以用空格隔开，也可是用 glob 模式。如果只打算忽略一次升级，可以使用 --ignore 选项。
+    忽略了的软件包可通过 pacman -S 升级。
+
+13、不升级软件包组
+    和软件包一样，也可以不升级某个软件包组：
+        IgnoreGroup = gnome
+
+14、跳过软件包文件
+    要跳过某些文件夹的安装，可以将它们放到 NoExtract 中，例如不想安装 systemd unit 文件：
+        NoExtract=usr/lib/systemd/system/*
+    通过下面命令可以产生类似 localepurgeAUR 的效果：
+        NoExtract = usr/share/help/* !usr/share/help/en*
+        NoExtract = usr/share/locale/* !usr/share/locale/en*
+        NoExtract = usr/share/man/* !usr/share/man/man*
+        NoExtract = usr/share/vim/vim74/lang/*
+    后面的规则覆盖前面的规则，加上 ! 可以取消跳过效果，这样可以只安装需要语言的本地化文件。
+
+15、软件仓库
+    这部分定义使用的软件仓库，在 /etc/pacman.conf 中引用，可以直接设置或者从其它文件包含。
+    所有官方软件仓库都使用同一个包含了'$repo' 的 /etc/pacman.d/mirrorlist文件，因此只需要维护一个列表。 下面例子中使用官方软件仓库，用 mirrorlist 设定镜像的一个范例。
+        #[testing]
+        #SigLevel = PackageRequired
+        #Include = /etc/pacman.d/mirrorlist
+
+        [core]
+        SigLevel = PackageRequired
+        Include = /etc/pacman.d/mirrorlist
+
+        [extra]
+        SigLevel = PackageRequired
+        Include = /etc/pacman.d/mirrorlist
+
+        #[community-testing]
+        #SigLevel = PackageRequired
+        #Include = /etc/pacman.d/mirrorlist
+
+        [community]
+        SigLevel = PackageRequired
+        Include = /etc/pacman.d/mirrorlist
+
+        # 如果打算在 x86_64 系统上运行32位软件，启用 multilib 软件仓库。
+
+        #[multilib-testing]
+        #SigLevel = PackageRequired
+        #Include = /etc/pacman.d/mirrorlist
+
+        #[multilib]
+        #SigLevel = PackageRequired
+        #Include = /etc/pacman.d/mirrorlist
+
+        # 自定义软件仓库实例，如何创建软件仓库参见 pacman man手册页。
+        #[custom]
+        #SigLevel = Optional TrustAll
+        #Server = file:///home/custompkgs
+    **使用 [testing] 仓库的时候要谨慎，这个仓库里面开发比较活跃，可能导致某些软件包不能工作。
+    
+16、软件包的安全性
+    pacman 4 支持软件包签名。
+    语句 SigLevel = Required DatabaseOptional 将启用全局签名验证，但会被每个软件仓库的 SigLevel 行所覆盖。
+    详情参见 pacman-key[https://wiki.archlinux.org/index.php/Pacman/Package_signing_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)]
+
+17、一般注意事项
+    警告: 小心使用 --force 开关。使用不当会造成大问题。 
+    pacman 附带了许多实用工具能让系统使用更加便捷。所有工具功能都能通过 --help 开关查看。运行：
+        $ pacman -Ql pacman | awk -F"[/ ]" '/\/usr\/bin/ {print $5}'
+        查看完整列表    
+        
+       
+18、Fonts install[https://wiki.archlinux.org/index.php/Fonts_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#.E5.AD.97.E4.BD.93.E7.B1.BB.E5.9E.8B] 
+
+
+
+
+
+
+
