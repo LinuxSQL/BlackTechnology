@@ -297,9 +297,31 @@
        
 18、Fonts install[https://wiki.archlinux.org/index.php/Fonts_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#.E5.AD.97.E4.BD.93.E7.B1.BB.E5.9E.8B] 
 
+=======安装后的折腾=====
+开源的 GUI 显示服务
+ #pacman -S xorg xorg-xclock xorg-xinit xterm xorg-server-utils xorg-twn
 
+桌面管理器（很重要，必須自启动）
+ #pacman -S sddm cinnamon
+ #systemctl enable sddm
 
+字体设置
+ #pacman -S ttf-freefont wqy-microhei ttf-dejavu ttf-droid cantarell-fonts adobe-source-han-sans-cn-fonts
 
-
-
-
+自定义软件
+ #pacman -S fcitx fcitx-im fcitx-configtool xfce4-terminal nano chromium docky gedit leafpad net-tools tcping virtualbox docker chromium shadowsocks
+ 
+ 介绍下自定义软件：
+    fcitx fcitx-im fcitx-configtool 输入法架构（同样的还有 ibus）
+    xfce4-terminal 终端界面（我熟悉的界面，类似 ubuntu、mint）
+    nano 文件管理器
+    chromium 谷歌浏览器
+    docky 类同 OSX 的辅助栏
+    gedit 文本输入器
+    leafpad 文本输入器（win 风格）
+    net-tools （基础网络组建包，包括了 ifconfig netstat route）
+    tcping (探测网络端口)
+    virtualbox （虚拟机）
+    docker （集装箱）
+    shadowsocks （ss）
+ 
